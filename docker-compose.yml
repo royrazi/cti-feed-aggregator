@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  # 1. קונטיינר מסד הנתונים
+  db:
+    image: postgres:15
+    container_name: cti-postgres-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. קונטיינר אפליקציית הפייתון
+  app:
+    build: .
+    container_name: cti-python-app
+    depends_on:
+      - db
+    env_file:
+      - .env
+    environment:
+      - PYTHONUNBUFFERED=1
+
+volumes:
+  postgres_data:
