@@ -35,15 +35,17 @@ def send_telegram_alert(ioc):
         response = requests.post(url, data=payload, timeout=10)
         if response.status_code == 200:
             logging.info(f"Telegram alert sent successfully for IP: {ioc['value']}")
+            return True
         else:
             logging.error(f"Failed to send Telegram alert. Status code: {response.status_code}")
+            return False
     except Exception as e:
         logging.error(f"Error sending Telegram alert: {e}")
+        return False
 
 
 # --- בלוק הרצה עצמאי לבדיקת המודול ---
 if __name__ == "__main__":
-    # מילון דמה בדירוג 100 לבדיקת שליחה
     dummy_ioc = {
         "value": "162.243.103.246",
         "type": "IP",
