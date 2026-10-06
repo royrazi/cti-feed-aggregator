@@ -1,5 +1,6 @@
 import os
 import psycopg2
+from psycopg2 import Error as Psycopg2Error
 from dotenv import load_dotenv
 from config import logging
 
@@ -35,8 +36,8 @@ def init_db():
                 cursor.execute(create_table_query)
                 conn.commit()
                 logging.info("PostgreSQL database initialized successfully!")
-    except Exception as e:
-        logging.error(f"Failed to initialize PostgreSQL database: {e}")
+    except Psycopg2Error as e:
+        logging.error(f"PostgreSQL Error during database initialization: {e}")
 
 def is_already_notified(ip_value):
     query = "SELECT notified FROM iocs WHERE value = %s;"
@@ -46,8 +47,8 @@ def is_already_notified(ip_value):
                 cursor.execute(query, (ip_value,))
                 result = cursor.fetchone()
                 return result[0] if result else False
-    except Exception as e:
-        logging.error(f"Error checking notification status for {ip_value}: {e}")
+    except Psycopg2Error as e:
+        logging.error(f"PostgreSQL Error checking notification status for {ip_value}: {e}")
         return False
 
 def mark_as_notified(ip_value):
@@ -57,8 +58,8 @@ def mark_as_notified(ip_value):
             with conn.cursor() as cursor:
                 cursor.execute(query, (ip_value,))
                 conn.commit()
-    except Exception as e:
-        logging.error(f"Error marking {ip_value} as notified: {e}")
+    except Psycopg2Error as e:
+        logging.error(f"PostgreSQL Error marking {ip_value} as notified: {e}")
 
 def save_iocs_to_db(iocs_dict):
     if not iocs_dict:
@@ -92,5 +93,5 @@ def save_iocs_to_db(iocs_dict):
                 cursor.executemany(insert_query, records)
                 conn.commit()
                 logging.info(f"Successfully saved {len(records)} indicators to PostgreSQL!")
-    except Exception as e:
-        logging.error(f"Failed to save IoCs to PostgreSQL: {e}")
+    except Psycopg2Error as e:
+        logging.error(f"PostgreSQL Error saving IoCs to DB: {e}")
