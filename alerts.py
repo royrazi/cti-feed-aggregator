@@ -3,14 +3,12 @@ from config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, logging
 
 CLOUD_PROVIDERS = ["DigitalOcean", "Amazon", "Hetzner", "Google", "OVH"]
 
-
 def should_send_alert(ioc, is_new):
     if is_new and ioc["score"] == 100 and len(ioc["sources"]) >= 2:
         for provider in CLOUD_PROVIDERS:
             if provider in ioc["isp"]:
                 return True
     return False
-
 
 def send_telegram_alert(ioc):
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
@@ -33,16 +31,12 @@ def send_telegram_alert(ioc):
 
     try:
         response = requests.post(url, data=payload, timeout=10)
-        if response.status_code == 200:
-            logging.info(f"Telegram alert sent successfully for IP: {ioc['value']}")
-            return True
-        else:
-            logging.error(f"Failed to send Telegram alert. Status code: {response.status_code}")
-            return False
-    except Exception as e:
-        logging.error(f"Error sending Telegram alert: {e}")
+        response.raise_for_status()
+        logging.info(f"Telegram alert sent successfully for IP: {ioc['value']}")
+        return True
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Network error sending Telegram alert: {e}")
         return False
-
 
 # --- בלוק הרצה עצמאי לבדיקת המודול ---
 if __name__ == "__main__":
